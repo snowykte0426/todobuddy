@@ -32,7 +32,7 @@ class MonthCalendar extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _Header(month: month, onChangeMonth: onChangeMonth),
-        const SizedBox(height: 20),
+        const SizedBox(height: 12),
         Row(
           children: [
             for (var i = 0; i < 7; i++)
@@ -41,7 +41,7 @@ class MonthCalendar extends StatelessWidget {
                   child: Text(
                     _weekdayLabels[i],
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: switch (i) { 5 => AppColors.saturday, 6 => AppColors.sunday, _ => AppColors.ink },
                     ),
@@ -72,13 +72,13 @@ class MonthCalendar extends StatelessWidget {
     return [
       for (var week = 0; week < cells.length ~/ 7; week++)
         Padding(
-          padding: const EdgeInsets.only(bottom: 6),
+          padding: EdgeInsets.only(bottom: week == cells.length ~/ 7 - 1 ? 0 : 6),
           child: Row(
             children: [
               for (var i = 0; i < 7; i++)
                 Expanded(
                   child: cells[week * 7 + i] == null
-                      ? const SizedBox(height: 74)
+                      ? const SizedBox(height: 52)
                       : _DayCell(
                           date: cells[week * 7 + i]!,
                           weekday: i,
@@ -117,21 +117,27 @@ class _Header extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text('${month.year}년 ${month.month}월',
-                    style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w800)),
+                    style: const TextStyle(fontSize: 22, height: 1.2, fontWeight: FontWeight.w800)),
                 const SizedBox(width: 6),
-                const Icon(Icons.keyboard_arrow_down_rounded, size: 26),
+                const Icon(Icons.keyboard_arrow_down_rounded, size: 22),
               ],
             ),
           ),
         ),
         const Spacer(),
         IconButton(
-          icon: const Icon(Icons.chevron_left_rounded),
+          icon: const Icon(Icons.chevron_left_rounded, size: 20),
+          constraints: const BoxConstraints.tightFor(width: 32, height: 32),
+          padding: EdgeInsets.zero,
+          style: IconButton.styleFrom(tapTargetSize: MaterialTapTargetSize.shrinkWrap),
           tooltip: '이전 달',
           onPressed: () => onChangeMonth(DateTime(month.year, month.month - 1)),
         ),
         IconButton(
-          icon: const Icon(Icons.chevron_right_rounded),
+          icon: const Icon(Icons.chevron_right_rounded, size: 20),
+          constraints: const BoxConstraints.tightFor(width: 32, height: 32),
+          padding: EdgeInsets.zero,
+          style: IconButton.styleFrom(tapTargetSize: MaterialTapTargetSize.shrinkWrap),
           tooltip: '다음 달',
           onPressed: () => onChangeMonth(DateTime(month.year, month.month + 1)),
         ),
@@ -221,15 +227,15 @@ class _DayCell extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(14),
       child: SizedBox(
-        height: 74,
+        height: 52,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             _DayBlob(segments: segments),
-            const SizedBox(height: 6),
+            const SizedBox(height: 4),
             Container(
-              width: 26,
-              height: 26,
+              width: 22,
+              height: 22,
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
@@ -238,7 +244,7 @@ class _DayCell extends StatelessWidget {
               child: Text(
                 '${date.day}',
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 12,
                   fontWeight: selected || isToday ? FontWeight.w800 : FontWeight.w500,
                   color: numberColor,
                 ),
@@ -259,7 +265,7 @@ class _DayBlob extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const size = 30.0;
+    const size = 24.0;
     if (segments.isEmpty) {
       return const _Squircle(size: size, child: ColoredBox(color: AppColors.blob));
     }
@@ -279,10 +285,10 @@ class _DayBlob extends StatelessWidget {
           ),
           Center(
             child: remaining == 0
-                ? const Icon(Icons.check_rounded, size: 19, color: Colors.white)
+                ? const Icon(Icons.check_rounded, size: 16, color: Colors.white)
                 : Text(
                     '$remaining',
-                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: Colors.white),
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w800, color: Colors.white),
                   ),
           ),
         ],

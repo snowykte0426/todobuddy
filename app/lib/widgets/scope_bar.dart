@@ -18,7 +18,7 @@ class ScopeBar extends StatelessWidget {
     final pendingCount = state.friendBook.incoming.length;
 
     return SizedBox(
-      height: 56,
+      height: 40,
       child: Row(
         children: [
           Expanded(
@@ -68,21 +68,21 @@ class _ScopeChip extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(5, 5, 16, 5),
+          padding: const EdgeInsets.fromLTRB(5, 5, 12, 5),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Avatar(
                 name: profile.name,
                 imageUrl: api.resolveUrl(profile.avatarUrl),
-                size: 32,
+                size: 26,
                 isCrew: profile.isCrew,
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 8),
               Text(
                 profile.name,
                 style: TextStyle(
-                  fontSize: 15,
+                  fontSize: 13,
                   fontWeight: FontWeight.w700,
                   color: selected ? Colors.white : AppColors.ink,
                 ),
@@ -116,7 +116,7 @@ class _RoundIconButton extends StatelessWidget {
             clipBehavior: Clip.antiAlias,
             child: InkWell(
               onTap: onPressed,
-              child: SizedBox(width: 42, height: 42, child: Icon(icon, size: 20, color: AppColors.ink)),
+              child: SizedBox(width: 36, height: 36, child: Icon(icon, size: 18, color: AppColors.ink)),
             ),
           ),
           if (badge > 0)
