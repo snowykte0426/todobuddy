@@ -109,6 +109,16 @@ cp server/.env.example server/.env   # GOOGLE_CLIENT_ID / SECRET 채우기
   - `public` 모든 친구와 내가 속한 크루에 자동 노출
 - **TODO** — `(카테고리, 날짜)` 에 귀속된다. 날짜가 바뀌면 그 날의 목록은 비어 있고,
   캘린더로 지난 날짜·앞으로 올 날짜를 오가며 읽고 쓸 수 있다.
+- **반복 일정** — 우상단 메뉴의 `반복 일정 추가`와 `반복 일정 관리`에서 설정한다.
+  일·주·월 단위의 1~999 간격, 복수 요일·날짜, 매월 몇째/마지막 요일, 말일을 지원한다.
+  시작일과 종료일은 포함하며, 종료일을 비우면 직접 중단할 때까지 반복한다.
+  새 루틴의 날짜 기준은 한국 시간(`Asia/Seoul`)이다. 주 단위 간격은 시작일이 속한 월~일 주에 고정된다.
+  없는 월별 날짜는 건너뛰기/말일 대체를 선택하고, 없는 다섯째 요일은 건너뛴다.
+  같은 날짜에 여러 조건이 겹쳐도 한 번만 생성한다.
+  날짜별 완료·이름 수정·삭제는 그 날짜에만 적용된다. 루틴 수정은 오늘 이후에 적용하며,
+  과거 기록과 완료하거나 개별 수정한 일정, 개별 삭제 예외는 보존한다.
+  루틴 삭제 시 과거 완료/미완료 기록 보존 여부와 오늘 삭제 여부를 각각 선택한다.
+  기본은 과거와 오늘 보존이며, 내일부터의 일정은 모두 제거한다.
 - **캘린더 색칠** — 날짜 칸은 그 날 TODO 가 있는 카테고리 색으로 칠해진다.
   여러 카테고리면 색이 가로 띠로 쌓이고, 전부 완료면 체크, 아니면 남은 개수를 보여준다.
 - **크루** — 한 명이 만들고 초대 코드로 참여한다. 각자가 그 크루에 공유하기로 한 카테고리만 모인다.
@@ -135,6 +145,11 @@ cp server/.env.example server/.env   # GOOGLE_CLIENT_ID / SECRET 채우기
 | POST | `/categories/reorder` | `{ids: []}` 드래그 정렬 |
 | POST | `/todos` | `{categoryId, date, title}` |
 | PATCH DELETE | `/todos/:id` | 완료 토글·이름 수정·삭제 |
+| GET POST | `/routines` | 내 반복 일정 목록·등록 |
+| POST | `/routines/preview` | 반복 설정으로 오늘 이후 예정 날짜 5개 계산 |
+| PATCH | `/routines/:id` | 전체 설정 및 `versionId`로 오늘 이후 규칙 수정 |
+| GET | `/routines/:id/deletion-preview` | 오늘 기준일 및 과거 완료/미완료·오늘 기록 수 |
+| DELETE | `/routines/:id` | `{asOfDate, keepPastDone, keepPastUndone, removeToday}`로 반복 중단·기록 정리 |
 | GET POST | `/crews` | 내 크루 목록·생성 |
 | POST | `/crews/join` | `{inviteCode}` |
 | GET PATCH | `/crews/:id` | 크루 상세(멤버 포함)·수정 |
@@ -164,6 +179,13 @@ cd app && flutter test --tags golden --update-goldens    # 갱신
 
 SQLite 파일은 `server/data/todobuddy.db`, 업로드한 프로필 사진은 `server/uploads/` 에 쌓입니다.
 둘 다 `.gitignore` 에 들어 있고, 지우고 `npm run seed` 를 다시 돌리면 초기 상태로 돌아갑니다.
+
+반복 기능은 서버 시작 시 기존 SQLite DB에 필요한 테이블·열·인덱스를 추가하며 기존 TODO는 보존합니다.
+반복 규칙은 이력으로 저장하고 보드·캘린더에서 조회한 범위만 TODO로 생성합니다.
+`(routine_id, date)` 고유 인덱스와 삭제 예외로 중복 및 삭제한 일정의 재생성을 방지합니다.
+과거 기록의 생성·보존은 해당 날짜를 이전에 조회했는지와 무관합니다.
+지원 날짜 범위는 1900-01-01~9999-12-31이며, 무기한 루틴은 특정 생성 개수로 제한하지 않습니다.
+새 앱을 사용하기 전에 서버도 함께 업데이트해야 `/routines` API를 사용할 수 있습니다.
 
 ## 알아 둘 것
 
