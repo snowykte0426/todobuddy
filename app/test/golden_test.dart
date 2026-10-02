@@ -20,18 +20,24 @@ void main() {
     // 한글이 보이도록 시스템 폰트를 테스트 엔진에 주입한다.
     const path = '/System/Library/Fonts/Supplemental/AppleGothic.ttf';
     if (File(path).existsSync()) {
-      final loader = FontLoader('Apple SD Gothic Neo')
-        ..addFont(Future.value(File(path).readAsBytesSync().buffer.asByteData()));
-      await loader.load();
+      final font = File(path).readAsBytesSync().buffer.asByteData();
+      for (final family in ['Roboto', 'Apple SD Gothic Neo']) {
+        await (FontLoader(family)..addFont(Future.value(font))).load();
+      }
     }
+    await (FontLoader('MaterialIcons')
+          ..addFont(rootBundle.load('fonts/MaterialIcons-Regular.otf')))
+        .load();
   });
 
   testWidgets('메인 화면 골든', (tester) async {
     SharedPreferences.setMockInitialValues({});
     final server = FakeServer();
-    final state = AppState(api: ApiClient(baseUrl: 'http://test.local', client: server.client));
+    final state = AppState(api: ApiClient(baseUrl: 'http://test.local', client: server.client))
+      ..selectedDate = DateTime(2026, 9, 15)
+      ..visibleMonth = DateTime(2026, 9);
 
-    tester.view.physicalSize = const Size(1440, 960);
+    tester.view.physicalSize = const Size(1120, 720);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(tester.view.reset);
 

@@ -5,6 +5,7 @@ import 'package:todobuddy_app/api/api_client.dart';
 import 'package:todobuddy_app/main.dart';
 import 'package:todobuddy_app/state/app_state.dart';
 import 'package:todobuddy_app/widgets/month_calendar.dart';
+import 'package:todobuddy_app/widgets/todo_column.dart';
 
 import 'support/fake_server.dart';
 
@@ -15,7 +16,9 @@ void main() {
   setUp(() {
     SharedPreferences.setMockInitialValues({});
     server = FakeServer();
-    state = AppState(api: ApiClient(baseUrl: 'http://test.local', client: server.client));
+    state = AppState(api: ApiClient(baseUrl: 'http://test.local', client: server.client))
+      ..selectedDate = DateTime(2026, 9, 15)
+      ..visibleMonth = DateTime(2026, 9);
   });
 
   /// 개발용 로그인을 거쳐 메인 화면까지 진입시킨다.
@@ -64,6 +67,52 @@ void main() {
 
     expect(server.requests, contains('GET /board'));
     expect(server.requests, contains('GET /board/calendar'));
+  });
+
+  for (final size in [const Size(1120, 720), const Size(800, 600), const Size(768, 600)]) {
+    testWidgets('${size.width.toInt()}px 창에서 6주 캘린더와 TODO 를 스크롤 없이 나란히 보여준다', (tester) async {
+      tester.view.physicalSize = size;
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+      state.visibleMonth = DateTime(2026, 11); // 일요일에 시작해 6주가 필요한 두 자리 월.
+
+      await signIn(tester);
+
+      final calendar = tester.getRect(find.byType(MonthCalendar));
+      final todos = tester.getRect(find.byType(TodoColumn));
+      expect(todos.left, greaterThan(calendar.right));
+      expect(todos.top, lessThan(calendar.top));
+      expect(calendar.bottom, lessThanOrEqualTo(size.height));
+      expect(tester.getRect(find.text('리스트 메뉴')).bottom, lessThanOrEqualTo(size.height));
+
+      final calendarScroll = tester.state<ScrollableState>(find.ancestor(
+        of: find.byType(MonthCalendar),
+        matching: find.byType(Scrollable),
+      ).first);
+      expect(calendarScroll.position.maxScrollExtent, 0);
+      expect(tester.takeException(), isNull);
+    });
+  }
+
+  testWidgets('좁은 창의 세로 배치가 창을 넓히면 다시 좌우 배치가 된다', (tester) async {
+    tester.view.physicalSize = const Size(680, 720);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.reset);
+
+    await signIn(tester);
+    expect(
+      tester.getRect(find.byType(TodoColumn)).top,
+      greaterThan(tester.getRect(find.byType(MonthCalendar)).bottom),
+    );
+    expect(tester.takeException(), isNull);
+
+    tester.view.physicalSize = const Size(1120, 720);
+    await tester.pumpAndSettle();
+    expect(
+      tester.getRect(find.byType(TodoColumn)).left,
+      greaterThan(tester.getRect(find.byType(MonthCalendar)).right),
+    );
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('체크박스를 누르면 서버에 완료 상태를 보낸다', (tester) async {

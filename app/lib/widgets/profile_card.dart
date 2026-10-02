@@ -26,22 +26,22 @@ class ProfileCard extends StatelessWidget {
         Avatar(
           name: profile.name,
           imageUrl: state.api.resolveUrl(profile.avatarUrl),
-          size: 72,
+          size: 56,
           isCrew: profile.isCrew,
         ),
-        const SizedBox(width: 18),
+        const SizedBox(width: 14),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(profile.name,
-                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800), overflow: TextOverflow.ellipsis),
+                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800), overflow: TextOverflow.ellipsis),
               const SizedBox(height: 4),
               Text(
                 hasBio ? profile.bio : (editable ? '프로필에 자기소개를 입력해보세요' : '소개가 아직 없어요'),
                 style: TextStyle(
-                  fontSize: 14,
+                  fontSize: 12,
                   color: hasBio ? AppColors.ink : AppColors.subtle,
                 ),
                 maxLines: 2,
@@ -57,7 +57,10 @@ class ProfileCard extends StatelessWidget {
         if (editable)
           IconButton(
             tooltip: '프로필 수정',
-            icon: const Icon(Icons.add_reaction_outlined, color: AppColors.subtle),
+            icon: const Icon(Icons.add_reaction_outlined, size: 20, color: AppColors.subtle),
+            constraints: const BoxConstraints.tightFor(width: 32, height: 32),
+            padding: EdgeInsets.zero,
+            style: IconButton.styleFrom(tapTargetSize: MaterialTapTargetSize.shrinkWrap),
             onPressed: () => showProfileEditDialog(context),
           ),
       ],

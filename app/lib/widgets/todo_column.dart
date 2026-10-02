@@ -35,9 +35,9 @@ class _TodoColumnState extends State<TodoColumn> {
       children: [
         Expanded(
           child: ListView.separated(
-            padding: const EdgeInsets.only(bottom: 24),
+            padding: const EdgeInsets.only(bottom: 20),
             itemCount: widget.board.categories.length,
-            separatorBuilder: (_, __) => const SizedBox(height: 28),
+            separatorBuilder: (_, __) => const SizedBox(height: 20),
             itemBuilder: (context, index) {
               final category = widget.board.categories[index];
               return _CategorySection(
@@ -53,14 +53,17 @@ class _TodoColumnState extends State<TodoColumn> {
         if (state.isOwnScope) ...[
           const Divider(height: 1),
           Padding(
-            padding: const EdgeInsets.only(top: 12),
+            padding: const EdgeInsets.only(top: 8),
             child: Align(
               alignment: Alignment.centerRight,
               child: TextButton.icon(
                 onPressed: widget.onManageCategories,
-                icon: const Icon(Icons.format_list_bulleted_rounded, size: 18),
+                icon: const Icon(Icons.format_list_bulleted_rounded, size: 16),
                 label: const Text('리스트 메뉴'),
-                style: TextButton.styleFrom(foregroundColor: AppColors.ink),
+                style: TextButton.styleFrom(
+                  foregroundColor: AppColors.ink,
+                  textStyle: Theme.of(context).textTheme.labelLarge?.copyWith(fontSize: 13),
+                ),
               ),
             ),
           ),
@@ -108,13 +111,13 @@ class _CategorySection extends StatelessWidget {
             ],
           ],
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         if (category.todos.isEmpty && !composing)
           Padding(
-            padding: const EdgeInsets.only(left: 14, top: 2, bottom: 2),
+            padding: const EdgeInsets.only(left: 12, top: 2, bottom: 2),
             child: Text(
               category.editable ? '+ 를 눌러 오늘 할 일을 더해보세요' : '아직 등록된 할 일이 없어요',
-              style: const TextStyle(color: AppColors.subtle, fontSize: 13),
+              style: const TextStyle(color: AppColors.subtle, fontSize: 12),
             ),
           ),
         for (final todo in category.todos) _TodoRow(todo: todo, category: category),
@@ -139,17 +142,17 @@ class _CategoryPill extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(color: AppColors.chipBg, borderRadius: BorderRadius.all(Radius.circular(24))),
-      padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
+      padding: const EdgeInsets.fromLTRB(12, 6, 6, 6),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(category.visibility.icon, size: 17, color: AppColors.subtle),
+          Icon(category.visibility.icon, size: 15, color: AppColors.subtle),
           const SizedBox(width: 8),
           Flexible(
             child: Text(
               category.name,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: category.color),
+              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: category.color),
             ),
           ),
           const SizedBox(width: 8),
@@ -160,7 +163,7 @@ class _CategoryPill extends StatelessWidget {
               clipBehavior: Clip.antiAlias,
               child: InkWell(
                 onTap: onAdd,
-                child: const SizedBox(width: 28, height: 28, child: Icon(Icons.add_rounded, size: 18)),
+                child: const SizedBox(width: 24, height: 24, child: Icon(Icons.add_rounded, size: 16)),
               ),
             )
           else
@@ -211,14 +214,14 @@ class _TodoRowState extends State<_TodoRow> {
               checked: widget.todo.done,
               onTap: editable ? () => state.toggleTodo(widget.todo) : null,
             ),
-            const SizedBox(width: 14),
+            const SizedBox(width: 10),
             Expanded(
               child: GestureDetector(
                 onDoubleTap: editable ? () => setState(() => _editing = true) : null,
                 child: Text(
                   widget.todo.title,
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 14,
                     fontWeight: FontWeight.w500,
                     color: widget.todo.done ? AppColors.subtle : AppColors.ink,
                     decoration: widget.todo.done ? TextDecoration.lineThrough : null,
@@ -254,10 +257,10 @@ class _Checkbox extends StatelessWidget {
         child: ClipPath(
           clipper: const _SquircleClipper(),
           child: Container(
-            width: 28,
-            height: 28,
+            width: 22,
+            height: 22,
             color: checked ? color : AppColors.blob,
-            child: checked ? const Icon(Icons.check_rounded, size: 18, color: Colors.white) : null,
+            child: checked ? const Icon(Icons.check_rounded, size: 15, color: Colors.white) : null,
           ),
         ),
       ),
@@ -352,14 +355,14 @@ class _TodoComposerState extends State<_TodoComposer> {
         children: [
           ClipPath(
             clipper: const _SquircleClipper(),
-            child: Container(width: 28, height: 28, color: widget.color.withValues(alpha: 0.25)),
+            child: Container(width: 22, height: 22, color: widget.color.withValues(alpha: 0.25)),
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: 10),
           Expanded(
             child: TextField(
               controller: _controller,
               focusNode: _focus,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
               decoration: const InputDecoration(
                 isDense: true,
                 border: InputBorder.none,

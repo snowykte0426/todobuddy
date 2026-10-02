@@ -17,7 +17,8 @@ import 'people_screen.dart';
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
-  static const _breakpoint = 900.0;
+  // 800px 데스크탑 창에서도 양쪽 패딩을 제외한 영역에 두 열이 들어간다.
+  static const _breakpoint = 720.0;
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +28,7 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(28, 12, 28, 20),
+          padding: const EdgeInsets.fromLTRB(24, 12, 24, 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -35,7 +36,7 @@ class HomeScreen extends StatelessWidget {
                 children: [
                   Expanded(child: ScopeBar(onManagePeople: () => _push(context, const PeopleScreen()))),
                   const SizedBox(width: 8),
-                  _MainMenuButton(),
+                  SizedBox(width: 36, height: 36, child: _MainMenuButton()),
                 ],
               ),
               if (state.errorMessage != null)
@@ -44,7 +45,7 @@ class HomeScreen extends StatelessWidget {
                   child: Text(state.errorMessage!,
                       style: const TextStyle(color: AppColors.sunday, fontSize: 13)),
                 ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
               Expanded(
                 child: board == null
                     ? Center(
@@ -72,9 +73,12 @@ class HomeScreen extends StatelessWidget {
                           return Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Expanded(flex: 6, child: SingleChildScrollView(child: left)),
-                              const SizedBox(width: 48),
-                              Expanded(flex: 5, child: right),
+                              SizedBox(
+                                width: (constraints.maxWidth * 0.4).clamp(320.0, 380.0),
+                                child: SingleChildScrollView(child: left),
+                              ),
+                              const SizedBox(width: 36),
+                              Expanded(child: right),
                             ],
                           );
                         },
@@ -107,7 +111,7 @@ class _LeftPane extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ProfileCard(profile: board.profile, editable: profileEditable),
-        const SizedBox(height: 32),
+        const SizedBox(height: 24),
         MonthCalendar(
           month: state.visibleMonth,
           selectedDate: state.selectedDate,
@@ -127,7 +131,8 @@ class _MainMenuButton extends StatelessWidget {
     final state = context.read<AppState>();
 
     return PopupMenuButton<String>(
-      icon: const Icon(Icons.menu_rounded, size: 26),
+      icon: const Icon(Icons.menu_rounded, size: 22),
+      padding: EdgeInsets.zero,
       tooltip: '메뉴',
       position: PopupMenuPosition.under,
       onSelected: (value) async {
