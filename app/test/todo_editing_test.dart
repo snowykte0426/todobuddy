@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -54,6 +55,43 @@ void main() {
   }
 
   Map<String, dynamic> writeBody(int index) => jsonDecode(server.todoWrites[index].body) as Map<String, dynamic>;
+
+  for (final longTitle in [false, true]) {
+    testWidgets('${longTitle ? '여러 줄' : '한 줄'} 할 일은 호버해도 행 높이와 주변 간격이 변하지 않는다', (tester) async {
+      final title = longTitle ? '회의 자료 정리와 발표 준비 및 다음 주 업무 계획 확인을 모두 마무리하기' : '디자인 리뷰 준비';
+      (server.board['categories'] as List)[1]['todos'][0]['title'] = title;
+      await signIn(tester);
+      if (longTitle) {
+        tester.view.physicalSize = const Size(800, 600);
+        await tester.pumpAndSettle();
+      }
+
+      final titleFinder = find.text(title);
+      final row = find.ancestor(of: titleFinder, matching: find.byType(Row)).first;
+      final surroundings = [row, titleFinder, find.text('혼자 하는 일'), find.text('러닝 30분')];
+      final before = surroundings.map(tester.getRect).toList();
+      final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await mouse.addPointer(location: Offset.zero);
+      addTearDown(mouse.removePointer);
+
+      await mouse.moveTo(tester.getCenter(titleFinder));
+      await tester.pumpAndSettle();
+      expect(find.byTooltip('이름 바꾸기').hitTestable(), findsOneWidget);
+      expect(surroundings.map(tester.getRect).toList(), before);
+
+      await mouse.moveTo(tester.getCenter(find.text('프로필에 자기소개를 입력해보세요')));
+      await tester.pumpAndSettle();
+      expect(find.byTooltip('이름 바꾸기').hitTestable(), findsNothing);
+      expect(surroundings.map(tester.getRect).toList(), before);
+
+      await mouse.moveTo(tester.getCenter(titleFinder));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byTooltip('이름 바꾸기').hitTestable());
+      await tester.pumpAndSettle();
+      expect(tester.widget<TextField>(find.byType(TextField)).focusNode!.hasFocus, isTrue);
+      expect(tester.takeException(), isNull);
+    });
+  }
 
   testWidgets('새 할 일은 바깥 클릭으로 저장되고 입력창이 닫힌다', (tester) async {
     await signIn(tester);

@@ -244,10 +244,19 @@ class _TodoRowState extends State<_TodoRow> {
                 ),
               ),
             ),
-            if (editable && _hovered) ...[
-              _MiniAction(icon: Icons.edit_outlined, tooltip: '이름 바꾸기', onTap: () => setState(() => _editing = true)),
-              _MiniAction(icon: Icons.close_rounded, tooltip: '삭제', onTap: () => state.deleteTodo(widget.todo)),
-            ],
+            if (editable)
+              SizedBox(
+                width: 56,
+                child: _hovered
+                    ? Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _MiniAction(icon: Icons.edit_outlined, tooltip: '이름 바꾸기', onTap: () => setState(() => _editing = true)),
+                          _MiniAction(icon: Icons.close_rounded, tooltip: '삭제', onTap: () => state.deleteTodo(widget.todo)),
+                        ],
+                      )
+                    : null,
+              ),
           ],
         ),
       ),
@@ -300,12 +309,17 @@ class _MiniAction extends StatelessWidget {
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => IconButton(
-        icon: Icon(icon, size: 16),
-        tooltip: tooltip,
-        color: AppColors.subtle,
-        visualDensity: VisualDensity.compact,
-        onPressed: onTap,
+  Widget build(BuildContext context) => SizedBox(
+        width: 28,
+        height: 22,
+        child: IconButton(
+          icon: Icon(icon, size: 16),
+          tooltip: tooltip,
+          color: AppColors.subtle,
+          padding: EdgeInsets.zero,
+          visualDensity: VisualDensity.compact,
+          onPressed: onTap,
+        ),
       );
 }
 
