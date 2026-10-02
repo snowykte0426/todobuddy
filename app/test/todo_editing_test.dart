@@ -57,7 +57,7 @@ void main() {
   Map<String, dynamic> writeBody(int index) => jsonDecode(server.todoWrites[index].body) as Map<String, dynamic>;
 
   for (final longTitle in [false, true]) {
-    testWidgets('${longTitle ? '여러 줄' : '한 줄'} 할 일은 호버해도 행 높이와 주변 간격이 변하지 않는다', (tester) async {
+    testWidgets('${longTitle ? '여러 줄' : '한 줄'} 할 일은 호버와 수정 포커스 전환 시 행 높이와 간격을 유지한다', (tester) async {
       final title = longTitle ? '회의 자료 정리와 발표 준비 및 다음 주 업무 계획 확인을 모두 마무리하기' : '디자인 리뷰 준비';
       (server.board['categories'] as List)[1]['todos'][0]['title'] = title;
       await signIn(tester);
@@ -89,13 +89,24 @@ void main() {
       await tester.tap(find.byTooltip('이름 바꾸기').hitTestable());
       await tester.pumpAndSettle();
       expect(tester.widget<TextField>(find.byType(TextField)).focusNode!.hasFocus, isTrue);
+      final editingRow = find.ancestor(of: find.byType(TextField), matching: find.byType(Row)).first;
+      expect(tester.getRect(editingRow), before[0]);
+      expect(tester.getRect(find.text('혼자 하는 일')), before[2]);
+      expect(tester.getRect(find.text('러닝 30분')), before[3]);
+      await tester.tap(find.descendant(of: editingRow, matching: find.byIcon(Icons.close_rounded)));
+      await tester.pumpAndSettle();
+      expect(surroundings.map(tester.getRect).toList(), before);
       expect(tester.takeException(), isNull);
     });
   }
 
   testWidgets('새 할 일은 바깥 클릭으로 저장되고 입력창이 닫힌다', (tester) async {
     await signIn(tester);
+    final todoRow = find.ancestor(of: find.text('주간 보고서 쓰기'), matching: find.byType(Row)).first;
+    final rowHeight = tester.getSize(todoRow).height;
     await compose(tester, '  책 읽기  ');
+    final inputRow = find.ancestor(of: find.byType(TextField), matching: find.byType(Row)).first;
+    expect(tester.getSize(inputRow).height, rowHeight);
     await clickOutside(tester);
 
     expect(server.todoWrites, hasLength(1));
@@ -130,6 +141,8 @@ void main() {
     testWidgets('기존 할 일 ${clickBlankArea ? '글자 옆 빈 영역' : '글자 영역'}을 더블 클릭하면 선택된 수정창이 열린다', (tester) async {
       await signIn(tester);
       final title = find.text('디자인 리뷰 준비');
+      final rowBefore = tester.getRect(find.ancestor(of: title, matching: find.byType(Row)).first);
+      final nextTodoBefore = tester.getRect(find.text('러닝 30분'));
       final position = clickBlankArea
           ? Offset(tester.getRect(find.ancestor(of: title, matching: find.byType(Row)).first).right - 80,
               tester.getCenter(title).dy)
@@ -137,6 +150,8 @@ void main() {
       await doubleClick(tester, position);
 
       final field = tester.widget<TextField>(find.byType(TextField));
+      expect(tester.getRect(find.ancestor(of: find.byType(TextField), matching: find.byType(Row)).first), rowBefore);
+      expect(tester.getRect(find.text('러닝 30분')), nextTodoBefore);
       expect(field.focusNode!.hasFocus, isTrue);
       expect(field.controller!.text, '디자인 리뷰 준비');
       expect(field.controller!.selection, const TextSelection(baseOffset: 0, extentOffset: 9));

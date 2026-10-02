@@ -409,28 +409,47 @@ class _TodoComposerState extends State<_TodoComposer> {
             ),
             const SizedBox(width: 10),
             Expanded(
-              child: TextField(
-                groupId: _focus,
-                controller: _controller,
-                focusNode: _focus,
-                readOnly: _submitting,
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-                decoration: const InputDecoration(
-                  isDense: true,
-                  border: InputBorder.none,
-                  hintText: '할 일을 입력하고 Enter',
-                  hintStyle: TextStyle(color: AppColors.subtle, fontWeight: FontWeight.w400),
-                ),
-                onSubmitted: (_) => _submit(),
-                onEditingComplete: () {},
-                onTapOutside: (_) => _submit(closeAfterSubmit: true),
+              child: Stack(
+                alignment: Alignment.centerLeft,
+                children: [
+                  // 여러 줄 제목도 수정 전의 행 높이를 유지한다.
+                  if (widget.initialText != null)
+                    IgnorePointer(
+                      child: Opacity(
+                        opacity: 0,
+                        child: Text(
+                          widget.initialText!,
+                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                        ),
+                      ),
+                    ),
+                  TextField(
+                    groupId: _focus,
+                    controller: _controller,
+                    focusNode: _focus,
+                    readOnly: _submitting,
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, height: 20 / 14),
+                    decoration: const InputDecoration(
+                      isDense: true,
+                      contentPadding: EdgeInsets.zero,
+                      constraints: BoxConstraints(minHeight: 22),
+                      border: InputBorder.none,
+                      hintText: '할 일을 입력하고 Enter',
+                      hintStyle: TextStyle(color: AppColors.subtle, fontWeight: FontWeight.w400),
+                    ),
+                    onSubmitted: (_) => _submit(),
+                    onEditingComplete: () {},
+                    onTapOutside: (_) => _submit(closeAfterSubmit: true),
+                  ),
+                ],
               ),
             ),
-            IconButton(
-              icon: const Icon(Icons.close_rounded, size: 16),
-              color: AppColors.subtle,
-              visualDensity: VisualDensity.compact,
-              onPressed: widget.onClose,
+            SizedBox(
+              width: 56,
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: _MiniAction(icon: Icons.close_rounded, tooltip: '작성 취소', onTap: widget.onClose),
+              ),
             ),
           ],
         ),
